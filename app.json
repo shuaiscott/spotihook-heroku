@@ -1,0 +1,7 @@
+{
+  "name": "Spotihook",
+  "description": "Webhook kickoff for Spotify",
+  "repository": "https://github.com/shuaiscott/spotihook",
+  "logo": "https://via.placeholder.com/150",
+  "keywords": ["python","scheduled","spotify"]
+}

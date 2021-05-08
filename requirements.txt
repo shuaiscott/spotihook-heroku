@@ -1,0 +1,5 @@
+python-dotenv>=0.17
+spotipy>=2.18,<3
+redis>=3.5,<4
+redis-shelve>=1.0,<2
+requests>=2.25,<3
