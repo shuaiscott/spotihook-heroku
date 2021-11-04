@@ -33,7 +33,7 @@ def spotihook():
     grab_time = datetime.utcnow()
 
     if 'tracks' in playlist and 'items' in playlist['tracks']:
-        print(f"Tracks in Playlist: {playlist['tracks']['items'].len()}")
+        print(f"Tracks in Playlist: {len(playlist['tracks']['items'])}")
 
         for item in playlist['tracks']['items']:
             # Format: 2021-05-07T03:04:24Z
