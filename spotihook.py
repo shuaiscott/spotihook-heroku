@@ -42,9 +42,11 @@ def spotihook():
         # Playlist changed, we need to detect new songs
         print(f"New snapshot detected. Processing changes ({dict['snapshot_id']} => {snapshot_id})")
         last_sync = dict['snapshot_timestamp']
+        print(f'Last snapshot timestamp: {last_sync}')
         if 'tracks' in playlist and 'items' in playlist['tracks']:
             for item in playlist['tracks']['items']:
                 # Format: 2021-05-07T03:04:24Z
+                print(f'{item['track']['name']} added at {item['added_at']}')
                 if datetime.strptime(item['added_at'], '%Y-%m-%dT%H:%M:%SZ') > last_sync:
                     print(f"New track found: {item['track']['artists'][0]['name']} - {item['track']['name']}")
 
