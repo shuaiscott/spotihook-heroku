@@ -28,17 +28,19 @@ DEBUG = os.environ.get('DEBUG', False)
 def spotihook():
     sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET))
 
-    playlist_info = sp.playlist(PLAYLIST_ID)
-    snapshot_id = playlist_info['snapshot_id']
+    snapshot_id = sp.playlist(PLAYLIST_ID)['snapshot_id']
     grab_time = datetime.utcnow()
-    total_items = playlist_info['total']
+    playlist = sp.playlist_items(PLAYLIST_ID, limit=100)
+    total_items = playlist['total']
 
-    items = []
+    items = playlist['items']
     
-    offset = 0
+    offset = 100
     while offset < total_items:
-        playlist = sp.playlist_items(PLAYLIST_ID, offset=offset)
-        items.extend(offset_playlist['items'])
+        print(f"Offset:{offset}")
+        playlist = sp.playlist_items(PLAYLIST_ID, offset=offset, limit=100)
+        items.extend(playlist['items'])
+        offset += 100
 
     for item in items:
         # Format: 2021-05-07T03:04:24Z
