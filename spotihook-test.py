@@ -28,46 +28,51 @@ DEBUG = os.environ.get('DEBUG', False)
 def spotihook():
     sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET))
 
-    playlist = sp.playlist(PLAYLIST_ID)
-    snapshot_id = playlist['snapshot_id']
+    playlist_info = sp.playlist(PLAYLIST_ID)
+    snapshot_id = playlist_info['snapshot_id']
     grab_time = datetime.utcnow()
+    total_items = playlist_info['total']
 
-    if 'tracks' in playlist and 'items' in playlist['tracks']:
-        print(f"Tracks in Playlist: {len(playlist['tracks']['items'])}")
+    items = []
+    
+    offset = 0
+    while offset < total_items:
+        playlist = sp.playlist_items(PLAYLIST_ID, offset=offset)
+        items.extend(offset_playlist['items'])
 
-        for item in playlist['tracks']['items']:
-            # Format: 2021-05-07T03:04:24Z
-            print(f"{item['track']['name']} added at {item['added_at']}")
-            print(f"Formatted time: {datetime.strptime(item['added_at'], '%Y-%m-%dT%H:%M:%SZ')}")
-            print(f"New track found: {item['track']['artists'][0]['name']} - {item['track']['name']}")
+    for item in items:
+        # Format: 2021-05-07T03:04:24Z
+        print(f"{item['track']['name']} added at {item['added_at']}")
+        print(f"Formatted time: {datetime.strptime(item['added_at'], '%Y-%m-%dT%H:%M:%SZ')}")
+        print(f"New track found: {item['track']['artists'][0]['name']} - {item['track']['name']}")
 
-            # Add Spotify data to data dict
-            data = {}
-            data['track_id'] = item['track']['id']
-            data['track_name'] = item['track']['name']
-            data['track_number'] = item['track']['track_number']
-            data['track_duration'] = item['track']['duration_ms']
-            data['artist_id'] = item['track']['artists'][0]['id']
-            data['artist_name'] = item['track']['artists'][0]['name']
-            data['album_id'] = item['track']['album']['id']
-            data['album_name'] = item['track']['album']['name']
-            data['album_type'] = item['track']['album']['album_type']
-            if 'isrc' in item['track']['external_ids']: data['isrc'] = item['track']['external_ids']['isrc']
+        # Add Spotify data to data dict
+        data = {}
+        data['track_id'] = item['track']['id']
+        data['track_name'] = item['track']['name']
+        data['track_number'] = item['track']['track_number']
+        data['track_duration'] = item['track']['duration_ms']
+        data['artist_id'] = item['track']['artists'][0]['id']
+        data['artist_name'] = item['track']['artists'][0]['name']
+        data['album_id'] = item['track']['album']['id']
+        data['album_name'] = item['track']['album']['name']
+        data['album_type'] = item['track']['album']['album_type']
+        if 'isrc' in item['track']['external_ids']: data['isrc'] = item['track']['external_ids']['isrc']
 
-            # Submit Webhook Request
-            url_template = Template(WEBHOOK_URL_TEMPLATE)
-            url= url_template.safe_substitute(data)
+        # Submit Webhook Request
+        url_template = Template(WEBHOOK_URL_TEMPLATE)
+        url= url_template.safe_substitute(data)
 
-            body = data
-            if 'WEBHOOK_BODY_TEMPLATE' in globals() and WEBHOOK_BODY_TEMPLATE:
-                body_template = Template(WEBHOOK_BODY_TEMPLATE)
-                body = body_template.safe_substitute(data)
-                if WEBHOOK_CONTENT_TYPE.upper() == 'JSON':
-                    body = json.loads(body)
-                # else we don't know what it is, so just send it as form data
+        body = data
+        if 'WEBHOOK_BODY_TEMPLATE' in globals() and WEBHOOK_BODY_TEMPLATE:
+            body_template = Template(WEBHOOK_BODY_TEMPLATE)
+            body = body_template.safe_substitute(data)
+            if WEBHOOK_CONTENT_TYPE.upper() == 'JSON':
+                body = json.loads(body)
+            # else we don't know what it is, so just send it as form data
 
-            print(f"Generated URL: {url}")
-            print(f"Generated body: {body}")
+        print(f"Generated URL: {url}")
+        print(f"Generated body: {body}")
     else:
         print(f"No changes detected @ {grab_time}")
 
